@@ -1,0 +1,270 @@
+<style lang="less">
+    .list {
+        width: 100%;
+
+    }
+
+    .customer-view {
+        margin-bottom: 220 rpx;
+    }
+</style>
+<template>
+    <view class="list">
+        <repeat for="{{customers}}" key="index" index="customerIndex" item="customer">
+            <view class="customer-view">
+                <view class="page__hd">
+                    <view class="page__title"><input class="weui-input"
+                                                                            @tap="clearCustomerName({{customerIndex}})"
+                                                                            bindinput="bindCustomerName({{customerIndex}})"
+                                                                            placeholder="输入顾客信息" value="{{ customer.name  }}"/> </view>
+                </view>
+                <view class="weui-form-preview">
+                    <view class="weui-form-preview__bd">
+                        <view class="weui-form-preview__item">
+                            <repeat for="{{customer.goodsArr}}" key="index" index="goodsIndex" item="goods">
+                                <view class="weui-flex vertical-container">
+                                    <view class="weui-flex__item">
+                                        <view class="placeholder">
+                                            <input class="weui-input"
+                                                   @tap="clearGoodsName({{customerIndex}},{{goodsIndex}})"
+                                                   bindinput="bindGoodsName({{customerIndex}},{{goodsIndex}})"
+                                                   placeholder="输入商品名" value="{{ goods.name  }}"/>
+                                        </view>
+                                    </view>
+                                    <view class="weui-flex__item">
+                                        <view class="placeholder">
+                                            <input type="digit" class="weui-input" placeholder="金额"
+                                                   bindinput="bindGoodsMoney({{customerIndex}},{{goodsIndex}})"/>
+                                        </view>
+                                    </view>
+                                    <view class="weui-flex__item">
+                                        <view class="placeholder">
+                                            <input type="number" class="weui-input" placeholder="数量"
+                                                   bindinput="bindGoodsNumber({{customerIndex}},{{goodsIndex}})"/>
+                                        </view>
+                                    </view>
+                                    <view class="weui-flex__item">
+                                        <view class="placeholder">
+                                            <input type="digit" class="weui-input" placeholder="折扣"
+                                                   bindinput="bindGoodsDiscount({{customerIndex}},{{goodsIndex}})"/>
+                                        </view>
+                                    </view>
+                                    <view class="weui-flex__item">
+                                        <view class="placeholder">
+                                            <i wx:if="{{customer.goodsArr.length !== goodsIndex+1}}"
+                                               @tap="removeGoods({{customerIndex}},{{goodsIndex}})"
+                                               style="font-size: 40rpx" class="iconfont icon-jianqu"></i>
+                                            <i wx:else @tap="addGoods({{ customerIndex }})" style="font-size: 40rpx"
+                                               class="iconfont icon-tianjia1"></i>
+                                        </view>
+
+                                    </view>
+                                </view>
+                            </repeat>
+                        </view>
+                    </view>
+
+
+                    <view class="weui-form-preview__hd">
+                        <view class="weui-form-preview__item">
+                            <view class="weui-cell weui-cell_input weui-cell_vcode">
+
+
+                                <view class="weui-cell__hd" style="width:150rpx;">
+                                    <input type="digit" class="weui-input" placeholder="抹零减"
+                                           bindinput="bindCustomerMinus({{customerIndex}})"/>
+                                </view>
+                                <view class="weui-cell__bd">
+                                    实付金额
+                                </view>
+                                <view class="weui-cell__ft">
+                                    <view class="weui-vcode-btn" style="min-width: 130rpx;">
+                                        ¥{{customersTotal[customerIndex]}}
+                                    </view>
+                                </view>
+                            </view>
+
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </repeat>
+
+        <view style="text-align: center">
+            <view class="weui-form-preview__ft">
+                <button @tap="addCustomers" class="weui-form-preview__btn weui-form-preview__btn_primary"
+                        hover-class="weui-form-preview__btn_active"><i style="font-size: 13px"
+                                                                       class="iconfont icon-tianjia">顾客({{ customerNumber
+                    }})</i>
+                </button>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+  import wepy from 'wepy'
+
+  export default class CustomerList extends wepy.component {
+
+    components = {}
+
+    data = {
+      customers: [
+        {
+          id: 1,
+          name: '顾客1',
+          minus: 0,      //减去数字 抹零操作
+          goodsArr: [
+            {
+              id: 1,
+              name: '商品1-1',
+              number: 1,
+              money: 0,
+              discount: 10,  // 折扣内容  如 9折    就是 100 * 0.9 = 90元
+            }
+          ]
+        }, {
+          id: 2,
+          name: '顾客2',
+          minus: 0,      //减去数字 抹零操作
+          goodsArr: [
+            {
+              id: 1,
+              name: '商品2-1',
+              number: 1,
+              money: 0,
+              discount: 10,  // 折扣内容  如 9折    就是 100 * 0.9 = 90元
+            }
+          ]
+        }
+      ]
+    }
+
+    computed = {
+      customersTotal () {
+        const data = []
+        for (let i in this.customers) {
+          let total = 0
+          let goodsArr = this.customers[i].goodsArr
+          for (let j in goodsArr) {
+            total += (goodsArr[j].money * goodsArr[j].number) * (goodsArr[j].discount / 10)
+          }
+          total -= this.customers[i].minus
+          data[i] = total.toFixed(2)
+        }
+
+        return data
+      }
+    }
+
+    methods = {
+      clearGoodsName (customerIndex, goodsIndex, e) {
+        console.log('清空值')
+
+        let goodsName = this.customers[customerIndex].goodsArr[goodsIndex].name
+        const patt = /^商品\d{1,}-\d{1,}/
+        if (patt.test(goodsName)) {
+          this.customers[customerIndex].goodsArr[goodsIndex].name = ''
+        } else {
+          console.log('不清空')
+        }
+      },
+
+      clearCustomerName (customerIndex, e) {
+        console.log('清空值')
+
+        let customerName = this.customers[customerIndex].name
+        const patt = /^顾客\d{1,}/
+        if (patt.test(customerName)) {
+          this.customers[customerIndex].name = ''
+        } else {
+          console.log('不清空')
+        }
+      },
+
+      bindCustomerName (customerIndex, e) {
+        console.log('bindGoodsName', customerIndex, e.detail)
+
+        this.customers[customerIndex].name = e.detail.value
+
+      },
+
+
+      bindCustomerMinus (customerIndex, e) {
+        console.log('bindGoodsName', customerIndex, e.detail)
+        this.customers[customerIndex].minus = e.detail.value
+      },
+
+      bindGoodsName (customerIndex, goodsIndex, e) {
+        console.log('bindGoodsName', customerIndex, goodsIndex, e.detail)
+        this.customers[customerIndex].goodsArr[goodsIndex].name = e.detail.value
+
+      },
+
+      bindGoodsNumber (customerIndex, goodsIndex, e) {
+        console.log('bindGoodsNumber', customerIndex, goodsIndex, e.detail)
+        this.customers[customerIndex].goodsArr[goodsIndex].number = e.detail.value
+      },
+
+      bindGoodsMoney (customerIndex, goodsIndex, e) {
+        console.log('bindGoodsMoney', customerIndex, goodsIndex, e.detail)
+        this.customers[customerIndex].goodsArr[goodsIndex].money = e.detail.value
+      },
+
+      bindGoodsDiscount (customerIndex, goodsIndex, e) {
+        console.log('bindGoodsDiscount', customerIndex, goodsIndex, e.detail)
+        this.customers[customerIndex].goodsArr[goodsIndex].discount = e.detail.value
+      },
+
+      addGoods (customerIndex) {
+
+        console.log('添加商品：顾客id：', customerIndex)
+
+        let count = this.customers[customerIndex].goodsArr.length
+        let id = this.customers[customerIndex].goodsArr[count-1].id
+        let goods = {
+          id: id + 1,
+          name: '商品' + (customerIndex+1) +'-'+ (id + 1),
+          number: 1,
+          money: 0,
+          discount: 10
+        }
+
+        console.log('添加商品', count, goods, this.goodsArr)
+        this.customers[customerIndex].goodsArr.push(goods)
+      },
+      removeGoods (customerIndex, index, event) {
+        console.log('减去', customerIndex, index)
+        this.customers[customerIndex].goodsArr.splice(index, 1)
+      },
+
+      addCustomers () {
+        console.log('添加一个顾客')
+        let len = this.customers.length
+
+        let customer = {
+          id: len + 1,
+          name: '顾客' + (len + 1),
+          minus: 0,
+          goodsArr: [
+            {
+              id: 1,
+              name: '商品' + (len + 1) + '-1',
+              number: 1,
+              money: 0,
+              discount: 10,  // 折扣内容  如 9折    就是 100 * 0.9 = 90元
+            }
+          ]
+        }
+        this.customers.push(customer)
+
+        console.log('添加完毕', customer)
+        this.$apply()
+
+      }
+    }
+
+    onLoad () {
+    }
+  }
+</script>
