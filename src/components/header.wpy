@@ -1,0 +1,93 @@
+<style lang="less">
+    .userinfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        float:left;
+    }
+
+    .userinfo-avatar {
+        width: 80rpx;
+        height: 80rpx;
+        border-radius: 50%;
+    }
+
+    .userinfo-nickname {
+        color: #aaa;
+    }
+
+    .helpicon {
+        padding: 0 20rpx 0 0;
+        text-align: center;
+        /*background-color: #EBEBEB;*/
+        /*color: #cfcfcf;*/
+    }
+    .helpicon > i {
+        font-size: 60rpx;
+        float:right;
+    }
+</style>
+
+<template>
+    <view class="weui-flex">
+        <view class="weui-flex__item">
+            <view class="userinfo" @tap="getUserInfo">
+                <image class="userinfo-avatar" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
+                <view class="userinfo-nickname">{{ userInfo.nickName }}</view>
+            </view>
+        </view>
+        <view class="weui-flex__item">
+            <span style="font-size: 20rpx">每天都是一句话，啊可是打飞机阿拉山口就发骚</span>
+        </view>
+        <view class="weui-flex__item" style="width: 500rpx;">
+            <view class="helpicon">
+                <i class="iconfont icon-bangzhu" style="color: #bd2c00" @tap="goHelp"></i>
+            </view>
+        </view>
+    </view>
+
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Header extends wepy.component {
+    data = {
+      userInfo: {
+        nickName: '加载中...'
+      }
+    }
+
+    methods = {
+
+      goHelp(){
+        console.log("URL跳转")
+        wx.navigateTo({
+          url: '../pages/help'
+        })
+      },
+
+      getUserInfo(){
+        this.$parent.$parent.getUserInfo((userInfo) => {
+          if (userInfo) {
+            this.userInfo = userInfo
+          }
+          this.$apply()
+        })
+      }
+    }
+
+
+    onLoad () {
+      this.$parent.$parent.getUserInfo((userInfo) => {
+        console.log("执行完毕",userInfo)
+        if (userInfo) {
+          this.userInfo = userInfo
+        }
+
+        this.$apply()
+      })
+    }
+  }
+</script>

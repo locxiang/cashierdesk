@@ -1,26 +1,9 @@
 <style lang="less">
-  .userinfo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
 
-  .userinfo-avatar {
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: 50%;
-  }
-
-  .userinfo-nickname {
-    color: #aaa;
-  }
 </style>
 <template>
   <view class="container">
-    <view class="userinfo">
-      <image class="userinfo-avatar" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
-      <view class="userinfo-nickname">{{ userInfo.nickName }}</view>
-    </view>
+    <header></header>
 
 
     <customer-list></customer-list>
@@ -31,19 +14,17 @@
     </view>
 
     <view class="weui-footer weui-footer_fixed-bottom">
-      <image src="../images/icon_footer.png" style="width: 84px; height: 19px;"></image>
+      <button class="weui-btn mini-btn" type="primary" size="mini">生成统计</button>
       <view class="weui-footer__text">Copyright © 2018-2019 newborn.X</view>
     </view>
 
-    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import CustomerList from '../components/customerList'
-  import Panel from '../components/panel'
-  import Toast from 'wepy-com-toast'
+  import Header from '../components/header'
 
 
 
@@ -52,17 +33,12 @@
       navigationBarTitleText: '简单收银台'
     }
     components = {
-      panel: Panel,
       "customer-list": CustomerList,
-      toast: Toast
+      header:Header
     }
 
 
-    data = {
-      userInfo: {
-        nickName: '加载中...'
-      }
-    }
+
 
     computed = {
       now () {
@@ -72,32 +48,14 @@
 
     methods = {
 
-      toast () {
-        let promise = this.$invoke('toast', 'show', {
-          title: '自定义标题',
-          img: 'https://raw.githubusercontent.com/kiinlam/wetoast/master/images/star.png'
-        })
 
-        promise.then((d) => {
-          console.log('toast done')
-        })
-      },
 
     }
 
-    onLoad() {
-      let self = this
-      this.$parent.getUserInfo((userInfo) => {
-        if (userInfo) {
-          this.userInfo = userInfo
-        }
 
-        setTimeout(() => {
-          this.$apply()
-        }, 3000)
-
-        this.$apply()
-      })
+    onLoad(){
     }
+
+
   }
 </script>

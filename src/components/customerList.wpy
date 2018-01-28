@@ -5,7 +5,17 @@
     }
 
     .customer-view {
-        margin-bottom: 220 rpx;
+        margin-bottom: 100px;
+    }
+
+    .customer-remove {
+        margin: 5px;
+        padding: 0 10px;
+        text-align: right;
+        /*background-color: #EBEBEB;*/
+        height: 2.3em;
+        line-height: 2.3em;
+        color: #bd2c00;
     }
 </style>
 <template>
@@ -13,10 +23,23 @@
         <repeat for="{{customers}}" key="index" index="customerIndex" item="customer">
             <view class="customer-view">
                 <view class="page__hd">
-                    <view class="page__title"><input class="weui-input"
-                                                                            @tap="clearCustomerName({{customerIndex}})"
-                                                                            bindinput="bindCustomerName({{customerIndex}})"
-                                                                            placeholder="输入顾客信息" value="{{ customer.name  }}"/> </view>
+                    <view class="page__title">
+                        <view class="weui-flex">
+                            <view class="weui-flex__item">
+                                <input width="50%" class="weui-input" @tap="clearCustomerName({{customerIndex}})"
+                                       bindinput="bindCustomerName({{customerIndex}})"
+                                       placeholder="输入 顾客{{ customer.id }} 信息" value="{{ customer.name  }}"/>
+                            </view>
+                            <view class="weui-flex__item ">
+                                <view class="customer-remove">
+                                    <i style="font-size: 50rpx;" class="icon iconfont icon-shanchu"
+                                       @tap="removeCustomer({{ customerIndex }})"></i>
+                                </view>
+                            </view>
+                        </view>
+
+
+                    </view>
                 </view>
                 <view class="weui-form-preview">
                     <view class="weui-form-preview__bd">
@@ -94,7 +117,8 @@
             <view class="weui-form-preview__ft">
                 <button @tap="addCustomers" class="weui-form-preview__btn weui-form-preview__btn_primary"
                         hover-class="weui-form-preview__btn_active"><i style="font-size: 13px"
-                                                                       class="iconfont icon-tianjia">顾客({{ customerNumber
+                                                                       class="iconfont icon-tianjia">顾客({{
+                    customerNumber
                     }})</i>
                 </button>
             </view>
@@ -170,6 +194,23 @@
         }
       },
 
+      removeCustomer (customerIndex, e) {
+        wx.showActionSheet({
+          itemList: ['YES', 'NO'],
+          success: (res) => {
+            if (!res.cancel) {
+
+              if (res.tapIndex === 0) {
+                console.log('customers', this.customers)
+                this.customers.splice(customerIndex, 1)
+                this.$apply()
+              }
+
+            }
+          }
+        })
+      },
+
       clearCustomerName (customerIndex, e) {
         console.log('清空值')
 
@@ -188,7 +229,6 @@
         this.customers[customerIndex].name = e.detail.value
 
       },
-
 
       bindCustomerMinus (customerIndex, e) {
         console.log('bindGoodsName', customerIndex, e.detail)
@@ -218,13 +258,14 @@
 
       addGoods (customerIndex) {
 
+        const customerId = this.customers[customerIndex].id
         console.log('添加商品：顾客id：', customerIndex)
 
         let count = this.customers[customerIndex].goodsArr.length
-        let id = this.customers[customerIndex].goodsArr[count-1].id
+        let id = this.customers[customerIndex].goodsArr[count - 1].id
         let goods = {
           id: id + 1,
-          name: '商品' + (customerIndex+1) +'-'+ (id + 1),
+          name: '商品' + customerId  + '-' + (id + 1),
           number: 1,
           money: 0,
           discount: 10
@@ -233,6 +274,7 @@
         console.log('添加商品', count, goods, this.goodsArr)
         this.customers[customerIndex].goodsArr.push(goods)
       },
+
       removeGoods (customerIndex, index, event) {
         console.log('减去', customerIndex, index)
         this.customers[customerIndex].goodsArr.splice(index, 1)
@@ -242,14 +284,19 @@
         console.log('添加一个顾客')
         let len = this.customers.length
 
+        let id = 1
+        if (len > 0) {
+          id = this.customers[len - 1].id
+        }
+
         let customer = {
-          id: len + 1,
-          name: '顾客' + (len + 1),
+          id: id + 1,
+          name: '顾客' + (id + 1),
           minus: 0,
           goodsArr: [
             {
               id: 1,
-              name: '商品' + (len + 1) + '-1',
+              name: '商品' + (id + 1) + '-1',
               number: 1,
               money: 0,
               discount: 10,  // 折扣内容  如 9折    就是 100 * 0.9 = 90元
